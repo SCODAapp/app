@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario Inteligente</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .gradient-header {
+      background: linear-gradient(to right, #3b82f6, #2563eb);
+    }
+    .modern-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .modern-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <header class="gradient-header shadow p-6 text-white">
+    <div class="container mx-auto">
+      <h1 class="text-4xl font-bold">Inventario Inteligente</h1>
+      <p class="text-blue-100 mt-2">La app web para contar inventario desde cualquier dispositivo, en equipo y sin instalaciones.</p>
+    </div>
+  </header>
+
+  <section class="py-16 bg-blue-50 text-center">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-4">Contá en equipo, desde cualquier lugar</h2>
+      <p class="mb-8 text-gray-600 max-w-2xl mx-auto">Ideal para ferreterías, almacenes, distribuidoras, y negocios que quieren simplicidad sin perder el control.</p>
+      <a href="#demo" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow hover:bg-blue-700">Probar Demo</a>
+    </div>
+  </section>
+
+  <section class="py-16">
+    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div class="bg-white p-6 rounded-xl shadow modern-card">
+        <h3 class="text-2xl font-semibold mb-3">100% Web</h3>
+        <p class="text-gray-600">No se instala nada. Accedé desde cualquier celular o computadora.</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow modern-card">
+        <h3 class="text-2xl font-semibold mb-3">Multiusuario</h3>
+        <p class="text-gray-600">Varios empleados pueden contar al mismo tiempo desde sus dispositivos.</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow modern-card">
+        <h3 class="text-2xl font-semibold mb-3">Exportación Rápida</h3>
+        <p class="text-gray-600">Descargá el reporte listo para imprimir o guardar como Excel.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo" class="py-16 bg-gray-100 text-center">
+    <div class="container mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-4">Probá la demo personalizada</h2>
+      <p class="mb-6 text-gray-600">Hicimos una demo para una empresa ficticia. Podés probar cómo funciona desde tu celular o computadora.</p>
+      <a href="file:///C:/Users/Usuario/Desktop/APPinv/demoSCODA.html" target="_blank" class="bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow hover:bg-green-700">Ir a la demo</a>
+    </div>
+  </section>
+
+  <section class="py-16">
+    <div class="container mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-10 text-center">Planes Personalizados</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white p-6 rounded-xl shadow modern-card">
+          <h3 class="text-xl font-semibold mb-2">Básico</h3>
+          <p class="mb-4 text-gray-600">Logo y colores personalizados. Acceso compartido.</p>
+          <p class="font-bold text-lg">Desde U$D 50</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow border-2 border-blue-600 modern-card">
+          <h3 class="text-xl font-semibold mb-2">Estándar</h3>
+          <p class="mb-4 text-gray-600">Todo lo anterior + identificación por usuario + historial de sesiones.</p>
+          <p class="font-bold text-lg">Desde U$D 100</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow modern-card">
+          <h3 class="text-xl font-semibold mb-2">Premium</h3>
+          <p class="mb-4 text-gray-600">Integración total con tu negocio, base de datos en la nube, soporte técnico.</p>
+          <p class="font-bold text-lg">Desde U$D 200</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 bg-blue-50">
+    <div class="container mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-4">¿Querés una versión para tu negocio?</h2>
+      <p class="mb-6 text-gray-600">Completá el siguiente formulario y te respondemos en menos de 24 horas.</p>
+      <!-- Botón para acceder al formulario de Google -->
+      <a href="https://forms.gle/NB2XF8w2QyLKKsMD6" target="_blank" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow hover:bg-blue-700">Llenar formulario</a>
+    </div>
+  </section>
+
+  <footer class="bg-white py-8 mt-16 border-t">
+    <div class="container mx-auto px-4 text-center">
+      <p class="text-sm text-gray-500 mb-4">&copy; 2025 Inventario Inteligente. Todos los derechos reservados.</p>
+      </footer>
+
+  <script>
+    function handleAdminAccess() {
+      const pass = prompt("Ingrese la contraseña de administrador:");
+      if (pass === "administrador25") {
+        window.location.href = "admin.html";
+      } else {
+        alert("Contraseña incorrecta");
+      }
+    }
+  </script>
+</body>
+</html>

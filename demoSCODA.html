@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Inventario General</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        /* Mantener todo el CSS igual */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        input, select, button { 
+            margin: 8px; 
+            padding: 10px; 
+            width: 90%; 
+            max-width: 400px; 
+            border-radius: 5px;
+            border: 1px solid #666;
+            background-color: #333;
+            color: #fff;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background-color: #333;
+        }
+        th { 
+            background-color: #4CAF50; 
+            color: white; 
+        }
+        td input { 
+            width: 80%; 
+            padding: 8px; 
+            text-align: center; 
+            border: 1px solid #666;
+            background-color: #444;
+            color: #fff;
+        }
+        .categoria-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px auto;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #333;
+        }
+        #lista-categorias {
+            margin: 15px 0;
+        }
+        .btn-reiniciar {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+        .btn-reiniciar-stock-minimo {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+        #productos-autocompletados {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin: 0 auto;
+            width: 90%;
+            max-width: 400px;
+            background-color: #333;
+            z-index: 1000;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #productos-autocompletados div {
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        #productos-autocompletados div:hover {
+            background-color: #444;
+        }
+        .alerta-stock-bajo {
+            background-color: #4a1f1f !important;
+        }
+        @keyframes parpadeo {
+            0% { background-color: #ffebee; }
+            50% { background-color: #ffcdd2; }
+            100% { background-color: #ffebee; }
+        }
+        .alerta-desplegable {
+            position: relative;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+        }
+        .boton-alerta {
+            background-color: #d32f2f;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .boton-alerta:hover {
+            background-color: #b71c1c;
+        }
+        .contenido-alerta {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            border: 1px solid #555;
+            width: 100%;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 0 0 5px 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .mostrar {
+            display: block;
+        }
+        .item-alerta {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #d32f2f;
+            background-color: #4a1f1f;
+            border-color: #6b2b2b;
+            text-align: left;
+        }
+        .contador-alertas {
+            background-color: white;
+            color: #d32f2f;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        .buscador-tabla {
+            margin: 5px;
+            flex: 2;
+        }
+        .buscador-tabla input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+        }
+        .contenedor-botones {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            width: 90%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .seccion-protegida {
+            display: none;
+        }
+        #contenedor-autenticacion {
+            margin: 20px auto;
+            text-align: center;
+            display: none;
+        }
+        #contenedor-autenticacion input {
+            margin: 5px;
+            padding: 10px;
+            width: 200px;
+        }
+        #contenedor-autenticacion button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #contenedor-autenticacion button:hover {
+            background-color: #45a049;
+        }
+        #mensaje-error {
+            color: red;
+            display: none;
+            margin-top: 10px;
+        }
+        .mensaje-flotante {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+        .contenedor-exportacion {
+            display: none;
+            margin: 15px 0;
+        }
+        #login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1E3C72, #2A5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .login-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #login-password {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+            margin-bottom: 15px;
+        }
+        #login-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #4A90E2;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #login-message {
+            color: #FF4B4B;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+        .boton-lista {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+        .boton-lista:hover {
+            background-color: #1976D2;
+        }
+        #contenido-lista {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            max-height: 400px;
+            z-index: 1000;
+        }
+        #contenido-lista div small {
+            color: #666;
+            font-size: 0.8em;
+        }
+        #contenido-lista .item-alerta {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #90CAF9;
+            background-color: #E3F2FD;
+            color: #2196F3;
+        }
+        .encabezado-lista {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #2196F3;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        .btn-borrar-lista {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 5px;
+        }
+        .btn-borrar-lista:hover {
+            color: #ffebee;
+        }
+        .alerta-desplegable {
+            position: relative;
+            display: inline-block;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+        }
+        #items-lista {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-container">
+        <div class="login-box">
+            <h1 style="color: white; font-size: 1.8rem; margin-bottom: 20px;">Tu Negocio</h1>
+            <input type="password" id="login-password" placeholder="Contraseña">
+            <button id="login-button" onclick="checkLogin()">Acceder</button>
+            <p id="login-message"></p>
+        </div>
+    </div>
+
+    <div id="content" style="display:none;">
+        <h2>Inventario General</h2>
+        <div id="mensaje-flotante" class="mensaje-flotante"></div>
+
+        <div>
+            <input type="text" id="buscador" placeholder="Buscar producto..." oninput="filtrarProductos()">
+            <div id="productos-autocompletados"></div>
+        </div>
+        <input type="number" id="cantidad" placeholder="Cantidad" step="0.01">
+        <button onclick="agregarStock()">Agregar al Stock</button>
+
+        <div class="alerta-desplegable">
+            <button class="boton-alerta" onclick="toggleAlertas()">
+                Alertas de Stock 
+                <span id="contador-alertas" class="contador-alertas">0</span>
+            </button>
+            <div id="contenido-alertas" class="contenido-alerta"></div>
+        </div>
+
+        <button onclick="mostrarAutenticacion()">Configuración</button>
+        <button class="boton-lista" onclick="toggleLista()">Lista</button>
+
+        <div class="alerta-desplegable">
+            <div id="contenido-lista" class="contenido-alerta">
+                <div class="encabezado-lista">
+                    <span>Últimos 50 registros</span>
+                    <button onclick="borrarHistorial()" class="btn-borrar-lista">🗑️</button>
+                </div>
+                <div id="items-lista"></div>
+            </div>
+        </div>
+        
+        <div id="contenedor-autenticacion">
+            <input type="password" id="password" placeholder="Ingrese la contraseña">
+            <button onclick="verificarContraseña()">Acceder</button>
+            <p id="mensaje-error">Contraseña incorrecta</p>
+        </div>
+        
+        <div class="seccion-protegida">
+            <div class="contenedor-exportacion" id="contenedor-exportacion">
+                <button onclick="exportarPDF()">Exportar a PDF</button>
+                <button onclick="exportarExcel()" style="background-color: #1d6f42;">Exportar a Excel</button>
+            </div>
+
+            <h3>Agregar Nuevo Producto</h3>
+            <input type="text" id="nuevo-producto" placeholder="Nombre del producto">
+            <input type="number" id="nuevo-cantidad" placeholder="Cantidad inicial" value="0" step="0.01">
+            <input type="number" id="nuevo-stock-minimo" placeholder="Stock mínimo" value="0" step="0.01">
+            <select id="nueva-categoria"></select>
+            <button onclick="agregarProducto()">Añadir Producto</button>
+
+            <h3>Agregar Nueva Categoría</h3>
+            <input type="text" id="nueva-categoria-input" placeholder="Nombre de la categoría">
+            <button onclick="agregarCategoria()">Agregar Categoría</button>
+
+            <h3>Categorías Existentes</h3>
+            <div id="lista-categorias"></div>
+
+            <h3>Stock Actual</h3>
+            <div class="contenedor-botones">
+                <button class="btn-reiniciar" onclick="reiniciarCantidades()">Reiniciar cantidades</button>
+                <button class="btn-reiniciar-stock-minimo" onclick="reiniciarStockMinimo()">Reiniciar stock mínimo</button>
+                <div class="buscador-tabla">
+                    <input type="text" id="buscador-tabla" placeholder="Buscar en la tabla..." oninput="filtrarTabla()">
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Stock Mínimo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-stock"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let inventario = {};
+        let categorias = [];
+        let historialAgregados = [];
+        const CONTRASEÑA_CORRECTA = "and2025";
+        const DEMO_KEY = 'inventario-demo';
+
+function guardarInventario() {
+    const data = {
+        inventario,
+        categorias,
+        historial: historialAgregados.slice(0, 50)
+    };
+    sessionStorage.setItem(DEMO_KEY, JSON.stringify(data));
+}
+
+function cargarInventario() {
+    const datos = sessionStorage.getItem(DEMO_KEY);
+    if (datos) {
+        const parsedData = JSON.parse(datos);
+        inventario = parsedData.inventario || {};
+        categorias = parsedData.categorias || [];
+        historialAgregados = parsedData.historial || [];
+    }
+    
+    actualizarLista();
+    actualizarDatalist();
+    actualizarListaCategorias();
+    verificarAlertas();
+    actualizarListaHistorial();
+}
+        
+        function checkLogin() {
+            const password = document.getElementById('login-password').value;
+            const message = document.getElementById('login-message');
+            const correctPassword = "diplo25";
+
+            if (password === correctPassword) {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                cargarInventario();
+            } else {
+                message.textContent = "Contraseña incorrecta. Inténtalo de nuevo.";
+            }
+        }
+
+        // El resto de funciones se mantienen iguales
+        function mostrarAutenticacion() {
+            document.getElementById("contenedor-autenticacion").style.display = "block";
+        }
+
+        function verificarContraseña() {
+            const password = document.getElementById("password").value;
+            const mensajeError = document.getElementById("mensaje-error");
+
+            if (password === CONTRASEÑA_CORRECTA) {
+                document.querySelectorAll(".seccion-protegida").forEach(seccion => {
+                    seccion.style.display = "block";
+                });
+                document.getElementById("contenedor-exportacion").style.display = "block";
+                document.getElementById("contenedor-autenticacion").style.display = "none";
+            } else {
+                mensajeError.style.display = "block";
+            }
+        }
+
+        function exportarExcel() {
+            const wb = XLSX.utils.book_new();
+            const datosInventario = [["Categoría", "Producto", "Cantidad", "Stock Mínimo", "Estado"]];
+            const datosAlertas = [["Producto", "Categoría", "Cantidad Actual", "Stock Mínimo", "Cantidad Necesaria"]];
+
+            Object.entries(inventario).forEach(([categoria, productos]) => {
+                Object.entries(productos).forEach(([producto, datos]) => {
+                    const estado = datos.cantidad < datos.stockMinimo ? "BAJO STOCK" : "OK";
+                    datosInventario.push([
+                        categoria,
+                        producto,
+                        datos.cantidad.toFixed(2),
+                        datos.stockMinimo.toFixed(2),
+                        estado
+                    ]);
+
+                    if (datos.cantidad < datos.stockMinimo) {
+                        datosAlertas.push([
+                            producto,
+                            categoria,
+                            datos.cantidad.toFixed(2),
+                            datos.stockMinimo.toFixed(2),
+                            (datos.stockMinimo - datos.cantidad).toFixed(2)
+                        ]);
+                    }
+                });
+            });
+
+            const wsInventario = XLSX.utils.aoa_to_sheet(datosInventario);
+            const wsAlertas = XLSX.utils.aoa_to_sheet(datosAlertas);
+
+            XLSX.utils.book_append_sheet(wb, wsInventario, "Inventario");
+            XLSX.utils.book_append_sheet(wb, wsAlertas, "Alertas");
+
+            if (wsInventario["!ref"]) {
+                const range = XLSX.utils.decode_range(wsInventario["!ref"]);
+                for (let R = 1; R <= range.e.r; ++R) {
+                    const cellAddress = { c: 4, r: R };
+                    const cellRef = XLSX.utils.encode_cell(cellAddress);
+                    if (wsInventario[cellRef] && wsInventario[cellRef].v === "BAJO STOCK") {
+                        wsInventario[cellRef].s = { fill: { fgColor: { rgb: "FFFF0000" } }, font: { bold: true } };
+                    }
+                }
+            }
+
+            XLSX.writeFile(wb, "inventario.xlsx");
+        }
+
+        function agregarStock() {
+            const producto = document.getElementById("buscador").value.trim();
+            const cantidad = parseFloat(document.getElementById("cantidad").value);
+
+            if (producto && !isNaN(cantidad) && cantidad > 0) {
+                let encontrado = false;
+                let productoInfo = null;
+
+                Object.keys(inventario).forEach(categoria => {
+                    if (inventario[categoria][producto]) {
+                        inventario[categoria][producto].cantidad += cantidad;
+                        encontrado = true;
+                        productoInfo = inventario[categoria][producto];
+
+                        historialAgregados.unshift({
+                            producto: producto,
+                            cantidad: cantidad,
+                            fecha: new Date().toLocaleString('es-ES', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })
+                        });
+                    }
+                });
+
+                if (encontrado) {
+                    guardarInventario();
+                    actualizarLista();
+                    mostrarMensajeFlotante(`+${cantidad} unidades agregadas a ${producto}`);
+                    actualizarListaHistorial();
+
+                    if(productoInfo.cantidad < productoInfo.stockMinimo) {
+                        alert(`¡ATENCIÓN! ${producto} sigue bajo stock mínimo (${productoInfo.cantidad}/${productoInfo.stockMinimo})`);
+                    }
+                } else {
+                    alert("Producto no encontrado");
+                }
+            } else {
+                alert("Ingrese un producto válido y cantidad numérica");
+            }
+            document.getElementById("cantidad").value = "";
+        }
+
+        function mostrarMensajeFlotante(mensaje) {
+            const mensajeFlotante = document.getElementById("mensaje-flotante");
+            mensajeFlotante.textContent = mensaje;
+            mensajeFlotante.style.display = "block";
+            setTimeout(() => {
+                mensajeFlotante.style.display = "none";
+            }, 3000);
+        }
+
+        function verificarAlertas() {
+            const contenidoAlertas = document.getElementById("contenido-alertas");
+            const contadorAlertas = document.getElementById("contador-alertas");
+            contenidoAlertas.innerHTML = "";
+            let contador = 0;
+
+            Object.entries(inventario).forEach(([categoria, productos]) => {
+                Object.entries(productos).forEach(([producto, datos]) => {
+                    if (datos.cantidad < datos.stockMinimo) {
+                        const itemAlerta = document.createElement("div");
+                        itemAlerta.className = "item-alerta";
+                        itemAlerta.textContent = `${producto} (${categoria}): ${datos.cantidad} / ${datos.stockMinimo}`;
+                        contenidoAlertas.appendChild(itemAlerta);
+                        contador++;
+                    }
+                });
+            });
+
+            contadorAlertas.textContent = contador;
+        }
+
+        function toggleAlertas() {
+            const contenidoAlertas = document.getElementById("contenido-alertas");
+            contenidoAlertas.classList.toggle("mostrar");
+        }
+
+        function actualizarDatalist() {
+            const select = document.getElementById("nueva-categoria");
+            select.innerHTML = "";
+            categorias.forEach(cat => {
+                const option = document.createElement("option");
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+            });
+        }
+
+        function actualizarListaCategorias() {
+            const lista = document.getElementById("lista-categorias");
+            lista.innerHTML = "";
+            categorias.forEach(cat => {
+                const div = document.createElement("div");
+                div.className = "categoria-item";
+                div.innerHTML = `
+                    <span>${cat}</span>
+                    <input type="checkbox" onchange="eliminarCategoria('${cat}')">
+                `;
+                lista.appendChild(div);
+            });
+        }
+
+        function actualizarLista() {
+            const tbody = document.getElementById("tabla-stock");
+            tbody.innerHTML = "";
+            
+            Object.entries(inventario).forEach(([categoria, productos]) => {
+                Object.entries(productos).forEach(([producto, datos]) => {
+                    const fila = document.createElement("tr");
+                    if(datos.cantidad < datos.stockMinimo) {
+                        fila.classList.add('alerta-stock-bajo');
+                    }
+                    fila.innerHTML = `
+                        <td>${categoria}</td>
+                        <td>${producto}</td>
+                        <td><input type="number" step="0.01" value="${datos.cantidad}" 
+                               onchange="actualizarCantidad('${categoria.replace(/'/g, "\\'")}', '${producto.replace(/'/g, "\\'")}', this.value)"></td>
+                        <td><input type="number" step="0.01" value="${datos.stockMinimo}" 
+                               onchange="actualizarStockMinimo('${categoria.replace(/'/g, "\\'")}', '${producto.replace(/'/g, "\\'")}', this.value)"></td>
+                        <td><button onclick="eliminarProducto('${categoria.replace(/'/g, "\\'")}', '${producto.replace(/'/g, "\\'")}')">Eliminar</button></td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            });
+            verificarAlertas();
+        }
+
+        function actualizarCantidad(categoria, producto, cantidad) {
+            if (!isNaN(cantidad) && cantidad >= 0) {
+                inventario[categoria][producto].cantidad = parseFloat(cantidad);
+                guardarInventario();
+                actualizarLista();
+            } else {
+                alert("Ingrese una cantidad válida");
+            }
+        }
+
+        function actualizarStockMinimo(categoria, producto, stockMinimo) {
+            if (!isNaN(stockMinimo) && stockMinimo >= 0) {
+                inventario[categoria][producto].stockMinimo = parseFloat(stockMinimo);
+                guardarInventario();
+                actualizarLista();
+            } else {
+                alert("Ingrese un stock mínimo válido");
+            }
+        }
+
+        function reiniciarCantidades() {
+            if (confirm("¿Estás seguro de que deseas reiniciar todas las cantidades a 0?")) {
+                Object.keys(inventario).forEach(categoria => {
+                    Object.keys(inventario[categoria]).forEach(producto => {
+                        inventario[categoria][producto].cantidad = 0;
+                    });
+                });
+                guardarInventario();
+                actualizarLista();
+            }
+        }
+
+        function reiniciarStockMinimo() {
+            if (confirm("¿Estás seguro de que deseas reiniciar todos los stocks mínimos a 0?")) {
+                Object.keys(inventario).forEach(categoria => {
+                    Object.keys(inventario[categoria]).forEach(producto => {
+                        inventario[categoria][producto].stockMinimo = 0;
+                    });
+                });
+                guardarInventario();
+                actualizarLista();
+            }
+        }
+
+        function eliminarCategoria(categoria) {
+            if (confirm(`¿Estás seguro de que deseas eliminar la categoría "${categoria}"?`)) {
+                delete inventario[categoria];
+                categorias = categorias.filter(cat => cat !== categoria);
+                guardarInventario();
+                actualizarLista();
+                actualizarListaCategorias();
+            }
+        }
+
+        function eliminarProducto(categoria, producto) {
+            if (confirm(`¿Estás seguro de que deseas eliminar el producto "${producto}"?`)) {
+                delete inventario[categoria][producto];
+                guardarInventario();
+                actualizarLista();
+            }
+        }
+
+        function agregarProducto() {
+            const nombre = document.getElementById("nuevo-producto").value.trim();
+            const cantidad = parseFloat(document.getElementById("nuevo-cantidad").value);
+            const stockMinimo = parseFloat(document.getElementById("nuevo-stock-minimo").value);
+            const categoria = document.getElementById("nueva-categoria").value;
+
+            if (nombre && !isNaN(cantidad) && !isNaN(stockMinimo)) {
+                if (!inventario[categoria]) {
+                    inventario[categoria] = {};
+                }
+                inventario[categoria][nombre] = {
+                    cantidad: cantidad,
+                    stockMinimo: stockMinimo
+                };
+                guardarInventario();
+                actualizarLista();
+                document.getElementById("nuevo-producto").value = "";
+                document.getElementById("nuevo-cantidad").value = "0";
+                document.getElementById("nuevo-stock-minimo").value = "0";
+            } else {
+                alert("Ingrese datos válidos");
+            }
+        }
+
+        function agregarCategoria() {
+            const nuevaCategoria = document.getElementById("nueva-categoria-input").value.trim();
+            if (nuevaCategoria && !categorias.includes(nuevaCategoria)) {
+                categorias.push(nuevaCategoria);
+                guardarInventario();
+                actualizarListaCategorias();
+                actualizarDatalist();
+                document.getElementById("nueva-categoria-input").value = "";
+            } else {
+                alert("La categoría ya existe o es inválida");
+            }
+        }
+
+        function toggleLista() {
+            const contenidoLista = document.getElementById("contenido-lista");
+            const contenidoAlertas = document.getElementById("contenido-alertas");
+            
+            if (contenidoAlertas.classList.contains("mostrar")) {
+                contenidoAlertas.classList.remove("mostrar");
+            }
+            contenidoLista.classList.toggle("mostrar");
+            actualizarListaHistorial();
+        }
+
+        function actualizarListaHistorial() {
+            const contenedorItems = document.getElementById("items-lista");
+            contenedorItems.innerHTML = "";
+
+            if (historialAgregados.length === 0) {
+                contenedorItems.innerHTML = "<div class='item-alerta'>No hay registros recientes</div>";
+                return;
+            }
+
+            historialAgregados.slice(0, 50).forEach(item => {
+                const div = document.createElement("div");
+                div.className = "item-alerta";
+                div.innerHTML = `
+                    <small>${item.fecha}</small><br>
+                    ${item.producto} (+${item.cantidad})
+                `;
+                contenedorItems.appendChild(div);
+            });
+        }
+
+        function borrarHistorial() {
+            if (confirm("¿Borrar todo el historial de agregados?\nEsta acción no se puede deshacer")) {
+                historialAgregados = [];
+                guardarInventario();
+                actualizarListaHistorial();
+                mostrarMensajeFlotante("Historial borrado");
+            }
+        }
+
+        function exportarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(18);
+            doc.text("Reporte de Inventario", 15, 15);
+            
+            const rows = [];
+            const comprasNecesarias = [];
+
+            Object.entries(inventario).forEach(([categoria, productos]) => {
+                Object.entries(productos).forEach(([producto, datos]) => {
+                    rows.push([
+                        categoria,
+                        producto,
+                        datos.cantidad.toFixed(2),
+                        datos.stockMinimo.toFixed(2)
+                    ]);
+                    
+                    if(datos.cantidad < datos.stockMinimo) {
+                        comprasNecesarias.push({
+                            producto: producto,
+                            categoria: categoria,
+                            necesario: datos.stockMinimo - datos.cantidad
+                        });
+                    }
+                });
+            });
+
+            doc.autoTable({
+                head: [['Categoría', 'Producto', 'Cantidad', 'Stock Mínimo']],
+                body: rows,
+                startY: 25,
+                styles: { 
+                    fontSize: 10,
+                    cellPadding: 3
+                },
+                headStyles: { 
+                    fillColor: [76, 175, 80],
+                    textColor: [255, 255, 255]
+                },
+                didParseCell: (data) => {
+                    if(data.column.index === 2 && data.cell.raw < data.row.raw[3]) {
+                        data.cell.styles.fillColor = [255, 205, 210];
+                        data.cell.styles.textColor = [213, 47, 47];
+                    }
+                }
+            });
+
+            if(comprasNecesarias.length > 0) {
+                doc.setFontSize(14);
+                doc.text("Compras Necesarias:", 15, doc.autoTable.previous.finalY + 15);
+                
+                const resumenData = comprasNecesarias.map(item => [
+                    item.producto,
+                    item.categoria,
+                    item.necesario
+                ]);
+
+                doc.autoTable({
+                    head: [['Producto', 'Categoría', 'Cantidad a Comprar']],
+                    body: resumenData,
+                    startY: doc.autoTable.previous.finalY + 20,
+                    headStyles: { 
+                        fillColor: [244, 67, 54],
+                        textColor: [255, 255, 255]
+                    },
+                    columnStyles: {
+                        2: { 
+                            fillColor: [255, 205, 210],
+                            fontStyle: 'bold'
+                        }
+                    },
+                    styles: { 
+                        fontSize: 10,
+                        cellPadding: 3
+                    }
+                });
+            }
+
+            doc.save('inventario.pdf');
+        }
+
+        function filtrarProductos() {
+            const input = document.getElementById("buscador").value.toLowerCase();
+            const contenedorSugerencias = document.getElementById("productos-autocompletados");
+            contenedorSugerencias.innerHTML = "";
+
+            if (input.length === 0) return;
+
+            let resultados = [];
+
+            Object.keys(inventario).forEach(categoria => {
+                Object.keys(inventario[categoria]).forEach(producto => {
+                    if (producto.toLowerCase().includes(input)) {
+                        resultados.push(producto);
+                    }
+                });
+            });
+
+            resultados.forEach(producto => {
+                const div = document.createElement("div");
+                div.textContent = producto;
+                div.onclick = () => {
+                    document.getElementById("buscador").value = producto;
+                    contenedorSugerencias.innerHTML = "";
+                };
+                contenedorSugerencias.appendChild(div);
+            });
+
+            if (resultados.length === 0) {
+                contenedorSugerencias.innerHTML = "<div>No se encontraron productos</div>";
+            }
+        }
+
+        function filtrarTabla() {
+            const input = document.getElementById("buscador-tabla").value.toLowerCase();
+            const filas = document.querySelectorAll("#tabla-stock tr");
+
+            filas.forEach(fila => {
+                const textoFila = fila.textContent.toLowerCase();
+                fila.style.display = textoFila.includes(input) ? "" : "none";
+            });
+        }
+
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest(".boton-alerta, .boton-lista, .contenido-alerta")) {
+                document.getElementById("contenido-alertas").classList.remove("mostrar");
+                document.getElementById("contenido-lista").classList.remove("mostrar");
+            }
+        });
+    </script>
+</body>
+</html>
