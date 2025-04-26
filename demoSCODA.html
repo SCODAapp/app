@@ -354,7 +354,7 @@
     <div id="login-container">
         <div class="login-box">
             <h1 style="color: white; font-size: 1.8rem; margin-bottom: 20px;">Tu Negocio</h1>
-            <input type="password" id="login-password" placeholder="Contraseña">
+            <input type="password" id="login-password" placeholder="demo123">
             <button id="login-button" onclick="checkLogin()">Acceder</button>
             <p id="login-message"></p>
         </div>
@@ -393,7 +393,7 @@
         </div>
         
         <div id="contenedor-autenticacion">
-            <input type="password" id="password" placeholder="Ingrese la contraseña">
+            <input type="password" id="password" placeholder="adm123">
             <button onclick="verificarContraseña()">Acceder</button>
             <p id="mensaje-error">Contraseña incorrecta</p>
         </div>
@@ -448,7 +448,7 @@
         let inventario = {};
         let categorias = [];
         let historialAgregados = [];
-        const CONTRASEÑA_CORRECTA = "and2025";
+        const CONTRASEÑA_CORRECTA = "adm123";
         const DEMO_KEY = 'inventario-demo';
 
 function guardarInventario() {
@@ -479,7 +479,7 @@ function cargarInventario() {
         function checkLogin() {
             const password = document.getElementById('login-password').value;
             const message = document.getElementById('login-message');
-            const correctPassword = "diplo25";
+            const correctPassword = "demo123";
 
             if (password === correctPassword) {
                 document.getElementById('login-container').style.display = 'none';
