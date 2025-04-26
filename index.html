@@ -49,6 +49,8 @@
     .dark-card {
       background-color: #2a2e37;
       color: #f7fafc;
+      justify-content: center;
+      text-align: center;
     }
 
     .light-section h2,
@@ -76,7 +78,7 @@
 
   <section class="py-16 text-center light-section" style="background-color: #3c4559;">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold mb-4">Una app web de inventario colaborativo que permite a varios empleados contar productos en línea, en simultáneo y desde cualquier dispositivo. Acceso protegido por contraseña, exportación en PDF y Excel, alertas automáticas de stock bajo y todo sin necesidad de instalaciones</h2>
+      <h2 class="text-3xl font-bold mb-4">app web de inventario colaborativo que permite a varios empleados contar productos en línea.</h2>
       <p class="mb-8 max-w-2xl mx-auto">Ideal para ferreterías, almacenes, restaurantes, distribuidoras, y negocios que buscan eficiencia operativa.</p>
       <a href="#demo" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow hover:bg-blue-700">Probar Demo</a>
     </div>
@@ -110,7 +112,8 @@
   <section class="py-16">
     <div class="container mx-auto px-4">
       <h2 class="text-2xl font-bold mb-10 text-center">Adquiri tu app con un unico pago</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-auto-fit md:grid-cols-[minmax(250px,_1fr)] gap-8">
+
         <div class="dark-card p-6 rounded-xl shadow modern-card">
           <h3 class="text-xl font-semibold mb-2">Básico</h3>
           <p class="mb-4">Personalización básica y acceso multi-usuario.</p>
@@ -139,17 +142,5 @@
       <p class="text-sm text-gray-400 mb-4">&copy; 2025 SCODA. Todos los derechos reservados.</p>
     </div>
   </footer>
-
-  <script>
-    function handleAdminAccess() {
-      const pass = prompt("Ingrese la contraseña de administrador:");
-      if (pass === "administrador25") {
-        window.location.href = "admin.html";
-      } else {
-        alert("Contraseña incorrecta");
-      }
-    }
-  </script>
-
 </body>
 </html>
